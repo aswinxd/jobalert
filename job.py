@@ -1,7 +1,7 @@
 from pyrogram import Client, filters
 import requests
 from bs4 import BeautifulSoup
-
+import logging
 app = Client("job_scraper_bot", 
              bot_token="7022599037:AAFLJR-NI5vWD_7roOyCdo4RFq9oP8wEKZ8", 
              api_id=7980140, 
