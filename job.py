@@ -3,9 +3,9 @@ import requests
 from bs4 import BeautifulSoup
 
 app = Client("job_scraper_bot", 
-             bot_token="YOUR_BOT_TOKEN", 
-             api_id=YOUR_API_ID, 
-             api_hash="YOUR_API_HASH")
+             bot_token="7022599037:AAFLJR-NI5vWD_7roOyCdo4RFq9oP8wEKZ8", 
+             api_id=7980140, 
+             api_hash="db84e318c6894f560a4087c20c33ce0a")
 
 # Function to scrape jobs
 def scrape_jobs(keyword, location):
