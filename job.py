@@ -34,10 +34,13 @@ def fetch_jobs(job_title, location):
         if 'data' in data and data['data']:
             for job in data['data']:
                 title = job.get('job_title', 'No Title')
-                salary = job.get('estimated_salary', 'No Salary Data')
                 company = job.get('employer_name', 'No Company Data')
+                location = job.get('location', {}).get('display_name', 'No Location Data')
+                description = job.get('job_description', 'No Description Available')
                 job_url = job.get('job_apply_link', 'No Link')
-                jobs.append(f"Job Title: {title}\nCompany: {company}\nEstimated Salary: {salary}\nLink: {job_url}\n\n")
+                posted_date = job.get('posted_at', 'No Posted Date')
+
+                jobs.append(f"Job Title: {title}\nCompany: {company}\nLocation: {location}\nDescription: {description}\nPosted: {posted_date}\nLink: {job_url}\n\n")
             return jobs if jobs else ["No jobs found"]
         else:
             return ["No jobs found"]
