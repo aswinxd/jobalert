@@ -9,38 +9,41 @@ app = Client("job_scraper_bot",
 
 # Function to scrape jobs
 rapidapi_key = "f97f646882mshbcc0c1f61a5549ep146823jsn2f8ac04b5bf1"
-url = "https://jsearch.p.rapidapi.com/estimated-salary"
+url = "https://linkedin-jobs-scraper-api.p.rapidapi.com/jobs/trial"
 
 # Function to Get Jobs Using API
-def fetch_jobs(job_title, location):
+def fetch_jobs(job_title, location, rows=25):
     try:
-        querystring = {
-            "query": job_title,
+        payload = {
+            "title": job_title,
             "location": location,
-            "num_pages": "1"
+            "rows": rows
         }
 
         headers = {
             "x-rapidapi-key": rapidapi_key,
-            "x-rapidapi-host": "jsearch.p.rapidapi.com"
+            "x-rapidapi-host": "linkedin-jobs-scraper-api.p.rapidapi.com",
+            "Content-Type": "application/json"
         }
 
-        response = requests.get(url, headers=headers, params=querystring)
+        response = requests.post(url, json=payload, headers=headers)
         response.raise_for_status()  # Ensure the request was successful
         data = response.json()
 
         # Parse and format the job data
         jobs = []
-        if 'data' in data and data['data']:
+        if 'data' in data:
             for job in data['data']:
-                title = job.get('job_title', 'No Title')
-                company = job.get('employer_name', 'No Company Data')
-                location = job.get('location', {}).get('display_name', 'No Location Data')
-                description = job.get('job_description', 'No Description Available')
-                job_url = job.get('job_apply_link', 'No Link')
-                posted_date = job.get('posted_at', 'No Posted Date')
+                job_title = job.get('title', 'No Title')
+                company = job.get('companyName', 'No Company Name')
+                location = job.get('location', 'No Location')
+                job_url = job.get('jobUrl', 'No Job URL')
+                posted_time = job.get('postedTime', 'No Posted Time')
+                applications_count = job.get('applicationsCount', 'No Application Count')
+                salary = job.get('salary', 'No Salary Data')
+                description = job.get('description', 'No Description')
 
-                jobs.append(f"Job Title: {title}\nCompany: {company}\nLocation: {location}\nDescription: {description}\nPosted: {posted_date}\nLink: {job_url}\n\n")
+                jobs.append(f"Job Title: {job_title}\nCompany: {company}\nLocation: {location}\nPosted: {posted_time}\nApplications: {applications_count}\nSalary: {salary}\nDescription: {description}\nLink: {job_url}\n\n")
             return jobs if jobs else ["No jobs found"]
         else:
             return ["No jobs found"]
