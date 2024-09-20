@@ -8,44 +8,42 @@ app = Client("job_scraper_bot",
              api_hash="db84e318c6894f560a4087c20c33ce0a")
 
 # Function to scrape jobs
-def scrape_jobs(keyword, location):
+rapidapi_key = "f97f646882mshbcc0c1f61a5549ep146823jsn2f8ac04b5bf1"
+url = "https://jsearch.p.rapidapi.com/estimated-salary"
+
+# Function to Get Jobs Using API
+def fetch_jobs(job_title, location):
     try:
-        url = f"https://www.adzuna.com/search?q={keyword}&l={location}"
-        logging.info(f"Fetching jobs from: {url}")
-        
-        # Send request to Adzuna
-        response = requests.get(url)
-        response.raise_for_status()  # Check if request is successful
+        querystring = {
+            "job_title": job_title,
+            "location": location,
+            "radius": "100"
+        }
 
-        # Print content for debugging
-        logging.info("Page content fetched successfully")
+        headers = {
+            "x-rapidapi-key": rapidapi_key,
+            "x-rapidapi-host": "jsearch.p.rapidapi.com"
+        }
 
-        # Parse HTML content
-        soup = BeautifulSoup(response.content, "html.parser")
+        response = requests.get(url, headers=headers, params=querystring)
+        response.raise_for_status()  # Ensure the request was successful
+        data = response.json()
 
-        # Check if job listings are found
+        # Parse and format the job data
         jobs = []
-        job_listings = soup.find_all('div', class_='result')
-        if not job_listings:
-            logging.warning("No jobs found in the HTML content.")
+        if 'data' in data and data['data']:
+            for job in data['data']:
+                title = job.get('job_title', 'No Title')
+                salary = job.get('estimated_salary', 'No Salary Data')
+                jobs.append(f"Job Title: {title}\nEstimated Salary: {salary}\n\n")
+            return jobs if jobs else ["No jobs found"]
+        else:
             return ["No jobs found"]
 
-        for job in job_listings:
-            title = job.find('h2').text if job.find('h2') else "No Title"
-            link = job.find('a')['href'] if job.find('a') else "No Link"
-            jobs.append(f"Job Title: {title}\nLink: {link}\n\n")
-
-        return jobs if jobs else ["No jobs found"]
-
     except requests.exceptions.RequestException as e:
-        logging.error(f"Error fetching jobs: {e}")
-        return ["Error fetching jobs"]
+        return [f"Error fetching jobs: {e}"]
 
-    except Exception as e:
-        logging.error(f"An error occurred: {e}")
-        return ["An error occurred while processing the data"]
-
-# Command to search jobs
+# Telegram Bot Command to Get Jobs
 @app.on_message(filters.command("jobs"))
 def get_jobs(client, message):
     try:
@@ -53,8 +51,8 @@ def get_jobs(client, message):
         if len(query) < 3:
             message.reply("Usage: /jobs <job_title> <location>")
             return
-        keyword, location = query[1], query[2]
-        jobs = scrape_jobs(keyword, location)
+        job_title, location = query[1], query[2]
+        jobs = fetch_jobs(job_title, location)
         message.reply("\n".join(jobs))
     except Exception as e:
         message.reply(f"Error: {str(e)}")
