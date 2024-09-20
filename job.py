@@ -9,11 +9,10 @@ app = Client("job_scraper_bot",
 
 # Function to scrape jobs
 def scrape_jobs(keyword, location):
-    try:
-        url = f"https://www.adzuna.com/search?q={keyword}&l={location}"
-        response = requests.get(url)
-        response.raise_for_status()  # Check if request was successful
-        soup = BeautifulSoup(response.content, "html.parser")
+    url = f"https://www.adzuna.com/search?q={keyword}&l={location}"
+    response = requests.get(url)
+    print(response.text) 
+    soup = BeautifulSoup(response.content, "html.parser")
         
         # Scraping logic
         jobs = []
