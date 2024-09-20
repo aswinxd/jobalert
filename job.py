@@ -15,9 +15,9 @@ url = "https://jsearch.p.rapidapi.com/estimated-salary"
 def fetch_jobs(job_title, location):
     try:
         querystring = {
-            "job_title": job_title,
+            "query": job_title,
             "location": location,
-            "radius": "100"
+            "num_pages": "1"
         }
 
         headers = {
@@ -35,7 +35,9 @@ def fetch_jobs(job_title, location):
             for job in data['data']:
                 title = job.get('job_title', 'No Title')
                 salary = job.get('estimated_salary', 'No Salary Data')
-                jobs.append(f"Job Title: {title}\nEstimated Salary: {salary}\n\n")
+                company = job.get('employer_name', 'No Company Data')
+                job_url = job.get('job_apply_link', 'No Link')
+                jobs.append(f"Job Title: {title}\nCompany: {company}\nEstimated Salary: {salary}\nLink: {job_url}\n\n")
             return jobs if jobs else ["No jobs found"]
         else:
             return ["No jobs found"]
