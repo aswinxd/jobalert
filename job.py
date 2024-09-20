@@ -9,22 +9,42 @@ app = Client("job_scraper_bot",
 
 # Function to scrape jobs
 def scrape_jobs(keyword, location):
-    url = f"https://www.adzuna.com/search?q={keyword}&l={location}"
-    response = requests.get(url)
-    print(response.text) 
-    soup = BeautifulSoup(response.content, "html.parser")
+    try:
+        url = f"https://www.adzuna.com/search?q={keyword}&l={location}"
+        logging.info(f"Fetching jobs from: {url}")
         
-        # Scraping logic
+        # Send request to Adzuna
+        response = requests.get(url)
+        response.raise_for_status()  # Check if request is successful
+
+        # Print content for debugging
+        logging.info("Page content fetched successfully")
+
+        # Parse HTML content
+        soup = BeautifulSoup(response.content, "html.parser")
+
+        # Check if job listings are found
         jobs = []
-        for job in soup.find_all('div', class_='result'):
-            title = job.find('h2').text
-            link = job.find('a')['href']
+        job_listings = soup.find_all('div', class_='result')
+        if not job_listings:
+            logging.warning("No jobs found in the HTML content.")
+            return ["No jobs found"]
+
+        for job in job_listings:
+            title = job.find('h2').text if job.find('h2') else "No Title"
+            link = job.find('a')['href'] if job.find('a') else "No Link"
             jobs.append(f"Job Title: {title}\nLink: {link}\n\n")
-        
+
         return jobs if jobs else ["No jobs found"]
-    except Exception as e:
-        logging.error(f"Error scraping jobs: {e}")
+
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error fetching jobs: {e}")
         return ["Error fetching jobs"]
+
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+        return ["An error occurred while processing the data"]
+
 # Command to search jobs
 @app.on_message(filters.command("jobs"))
 def get_jobs(client, message):
